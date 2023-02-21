@@ -47,7 +47,7 @@ jobs:
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
       - name: Download chezmoi
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: twpayne/chezmoi
           latest: true
@@ -55,7 +55,7 @@ jobs:
           out-file-path: vyos-build/packages
 
       - name: Download croc
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: croc/releases
           latest: true
@@ -63,7 +63,7 @@ jobs:
           out-file-path: vyos-build/packages
 
       - name: Download rclone
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: rclone/rclone
           latest: true
@@ -71,7 +71,7 @@ jobs:
           out-file-path: vyos-build/packages
 
       - name: Download SOPS
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: mozilla/sops
           latest: true
@@ -99,7 +99,7 @@ jobs:
               --custom-package "jq"
 
       - name: Create release with artifact
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1
         with:
           token: "${{ steps.generate-token.outputs.token }}"
           tag: "v${{ steps.vars.outputs.tag-name }}"
