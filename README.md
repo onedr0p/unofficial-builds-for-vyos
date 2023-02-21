@@ -15,3 +15,4 @@ VyOS **1.4-rolling** with additional packages.
 - jq
 - rclone
 - sops
+- tree

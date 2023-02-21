@@ -110,7 +110,8 @@ jobs:
               --custom-package "bat" \
               --custom-package "exfatprogs" \
               --custom-package "git" \
-              --custom-package "jq"
+              --custom-package "jq" \
+              --custom-package "tree"
 
       - name: Create release with artifact
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1
