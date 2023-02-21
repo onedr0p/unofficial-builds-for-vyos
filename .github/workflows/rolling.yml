@@ -57,7 +57,7 @@ jobs:
       - name: Download croc
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
-          repository: croc/releases
+          repository: schollz/croc
           latest: true
           fileName: "*Linux-64bit.deb"
           out-file-path: vyos-build/packages
