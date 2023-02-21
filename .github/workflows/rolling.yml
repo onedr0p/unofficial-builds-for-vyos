@@ -62,6 +62,14 @@ jobs:
           fileName: "*Linux-64bit.deb"
           out-file-path: vyos-build/packages
 
+      - name: Download gh
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: cli/cli
+          latest: true
+          fileName: "*linux_amd64.deb"
+          out-file-path: vyos-build/packages
+
       - name: Download rclone
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
@@ -93,6 +101,7 @@ jobs:
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
+              --custom-package "age" \
               --custom-package "bat" \
               --custom-package "exfatprogs" \
               --custom-package "git" \
