@@ -46,7 +46,12 @@ jobs:
       - name: Clone vyos-build
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
-      - name: Download chezmoi
+      - name: Download 1password deb
+        run: |
+          curl -fsSL "https://downloads.1password.com/linux/debian/amd64/stable/1password-cli-amd64-latest.deb" \
+              -o vyos-build/packages/1password-cli-amd64-latest.deb
+
+      - name: Download chezmoi deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: twpayne/chezmoi
@@ -54,7 +59,7 @@ jobs:
           fileName: "*linux_amd64.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download croc
+      - name: Download croc deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: schollz/croc
@@ -62,7 +67,7 @@ jobs:
           fileName: "*Linux-64bit.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download gh
+      - name: Download gh deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: cli/cli
@@ -70,7 +75,7 @@ jobs:
           fileName: "*linux_amd64.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download rclone
+      - name: Download rclone deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: rclone/rclone
@@ -78,7 +83,7 @@ jobs:
           fileName: "*linux-amd64.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download SOPS
+      - name: Download SOPS rpm
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: mozilla/sops
@@ -86,11 +91,11 @@ jobs:
           fileName: "*x86_64.rpm"
           out-file-path: vyos-build/packages
 
-      - name: Convert SOPS .rpm to .deb
+      - name: Convert any RPMs to DEBs
         working-directory: vyos-build/packages
         run: |
-          sudo alien --to-deb sops-*
-          rm -rf sops-*.rpm
+          sudo alien --to-deb *.rpm
+          rm -rf *.rpm
 
       - name: Configure
         working-directory: vyos-build
