@@ -1,0 +1,109 @@
+---
+name: VyOS Rolling
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 3 * * *
+
+env:
+  VYOS_URL: https://github.com/vyos/vyos-build
+  VYOS_BRANCH: current
+  VYOS_ARCH: amd64
+  VYOS_BUILD_BY: 98030736+rosey-bot[bot]@users.noreply.github.com
+  VYOS_BUILD_TYPE: release
+  VYOS_VERSION: 1.4-rolling
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # Need permission to write to the Releases tab now.
+      # https://github.com/ncipollo/release-action/issues/208.
+      contents: write
+    container:
+      image: vyos/vyos-build:current
+      options: --privileged
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Setup variables
+        id: vars
+        run: |
+          build_date=$(date +%Y%m%d%H%M)
+          echo "tag-name=${{ env.VYOS_VERSION }}-${build_date}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${{ env.VYOS_VERSION }}-${build_date}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Tools
+        run: |
+          sudo apt install -y alien
+
+      - name: Clone vyos-build
+        run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
+
+      - name: Download chezmoi
+        uses: robinraju/release-downloader@v1.7
+        with:
+          repository: twpayne/chezmoi
+          latest: true
+          fileName: "*linux_amd64.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download croc
+        uses: robinraju/release-downloader@v1.7
+        with:
+          repository: croc/releases
+          latest: true
+          fileName: "*Linux-64bit.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download rclone
+        uses: robinraju/release-downloader@v1.7
+        with:
+          repository: rclone/rclone
+          latest: true
+          fileName: "*linux-amd64.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download SOPS
+        uses: robinraju/release-downloader@v1.7
+        with:
+          repository: mozilla/sops
+          latest: true
+          fileName: "*x86_64.rpm"
+          out-file-path: vyos-build/packages
+
+      - name: Convert SOPS .rpm to .deb
+        working-directory: vyos-build/packages
+        run: |
+          sudo alien --to-deb sops-*
+          rm -rf sops-*.rpm
+
+      - name: Configure
+        working-directory: vyos-build
+        run: |
+          ./build-vyos-image iso \
+              --architecture ${{ env.VYOS_ARCH }} \
+              --build-by ${{ env.VYOS_BUILD_BY }} \
+              --build-type ${{ env.VYOS_BUILD_TYPE }} \
+              --build-comment "VyOS with additional packages" \
+              --version ${{ steps.vars.outputs.tag-name }} \
+              --custom-package "bat" \
+              --custom-package "exfatprogs" \
+              --custom-package "git" \
+              --custom-package "jq"
+
+      - name: Create release with artifact
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          tag: "v${{ steps.vars.outputs.tag-name }}"
+          artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
+          body: |
+            Official VyOS Changelog:
+            https://docs.vyos.io/en/latest/changelog/1.4.html
