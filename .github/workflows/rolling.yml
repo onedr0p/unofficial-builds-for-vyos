@@ -75,6 +75,14 @@ jobs:
           fileName: "*linux_amd64.deb"
           out-file-path: vyos-build/packages
 
+      - name: Download kopia deb
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: kopia/kopia
+          latest: true
+          fileName: "*linux_amd64.deb"
+          out-file-path: vyos-build/packages
+
       - name: Download neovim deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
