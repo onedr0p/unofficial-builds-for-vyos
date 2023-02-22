@@ -113,6 +113,7 @@ jobs:
               --custom-package "gron" \
               --custom-package "jo" \
               --custom-package "jq" \
+              --custom-package "moreutils" \
               --custom-package "tree"
 
       - name: Create release with artifact
