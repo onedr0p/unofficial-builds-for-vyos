@@ -130,6 +130,7 @@ jobs:
               --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "moreutils" \
+              --custom-package "ripgrep" \
               --custom-package "tree"
 
       - name: Create release with artifact
