@@ -110,6 +110,8 @@ jobs:
               --custom-package "bat" \
               --custom-package "exfatprogs" \
               --custom-package "git" \
+              --custom-package "gron" \
+              --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "tree"
 
