@@ -46,6 +46,14 @@ jobs:
       - name: Clone vyos-build
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
+      - name: Download bottom rpm
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: ClementTsang/bottom
+          latest: true
+          fileName: "*amd64.deb"
+          out-file-path: vyos-build/packages
+
       - name: Download SOPS rpm
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
