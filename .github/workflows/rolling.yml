@@ -79,8 +79,6 @@ jobs:
               --version ${{ steps.vars.outputs.tag-name }} \
               --custom-package "age" \
               --custom-package "bat" \
-              --custom-package "exfat-fuse" \
-              --custom-package "exfatprogs" \
               --custom-package "git" \
               --custom-package "jo" \
               --custom-package "jq" \
