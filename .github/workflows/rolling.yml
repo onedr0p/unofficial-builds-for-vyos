@@ -54,19 +54,21 @@ jobs:
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download SOPS rpm
+      - name: Download kopia deb
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: kopia/kopia
+          latest: true
+          fileName: "*linux_amd64.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download sops deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: mozilla/sops
           latest: true
-          fileName: "*x86_64.rpm"
+          fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
-
-      - name: Convert any RPMs to DEBs
-        working-directory: vyos-build/packages
-        run: |
-          sudo alien --to-deb *.rpm
-          rm -rf *.rpm
 
       - name: Configure
         working-directory: vyos-build
@@ -80,6 +82,7 @@ jobs:
               --custom-package "age" \
               --custom-package "bat" \
               --custom-package "git" \
+              --custom-package "gron" \
               --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "moreutils" \
