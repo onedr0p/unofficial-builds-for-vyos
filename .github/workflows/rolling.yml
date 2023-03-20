@@ -13,6 +13,7 @@ env:
   VYOS_BUILD_BY: 98030736+rosey-bot[bot]@users.noreply.github.com
   VYOS_BUILD_TYPE: release
   VYOS_VERSION: 1.4-rolling
+  MFT_VERSION: 4.23.0-104
 
 jobs:
   release:
@@ -45,6 +46,15 @@ jobs:
 
       - name: Clone vyos-build
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
+
+      - name: Download and include Mellanox firmware tools
+        working-directory: vyos-build/packages
+        run: |
+          wget -q https://www.mellanox.com/downloads/MFT/mft-${{ env.MFT_VERSION }}-x86_64-deb.tgz -O mft-deb.tgz
+          tar -zxvf mft-deb.tgz
+          mv mft-${{ env.MFT_VERSION}}-x86_64-deb/DEBS/*.deb .
+          rm -rf mft-${{ env.MFT_VERSION}}-x86_64-deb mft-deb.tgz
+          rm mft-pcap_${{ env.MFT_VERSION }}_amd64.deb
 
       - name: Download bottom deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
