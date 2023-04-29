@@ -46,6 +46,30 @@ jobs:
       - name: Clone vyos-build
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
+      - name: Download bottom deb
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: ClementTsang/bottom
+          latest: true
+          fileName: "*amd64.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download kopia deb
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: kopia/kopia
+          latest: true
+          fileName: "*linux_amd64.deb"
+          out-file-path: vyos-build/packages
+
+      - name: Download sops deb
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        with:
+          repository: mozilla/sops
+          latest: true
+          fileName: "*amd64.deb"
+          out-file-path: vyos-build/packages
+
       - name: Configure
         working-directory: vyos-build
         run: |
@@ -54,7 +78,15 @@ jobs:
               --build-by ${{ env.VYOS_BUILD_BY }} \
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
-              --version ${{ steps.vars.outputs.tag-name }}
+              --version ${{ steps.vars.outputs.tag-name }} \
+              --custom-package "age" \
+              --custom-package "bat" \
+              --custom-package "git" \
+              --custom-package "gron" \
+              --custom-package "jo" \
+              --custom-package "jq" \
+              --custom-package "moreutils" \
+              --custom-package "tree"
 
       - name: Create release with artifact
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1
