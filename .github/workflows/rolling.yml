@@ -39,28 +39,8 @@ jobs:
           echo "tag-name=${{ env.VYOS_VERSION }}-${build_date}" >> "$GITHUB_OUTPUT"
           echo "iso-name=${{ env.VYOS_VERSION }}-${build_date}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
 
-      - name: Setup Tools
-        run: |
-          sudo apt install -y alien
-
       - name: Clone vyos-build
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
-
-      - name: Download bottom deb
-        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
-        with:
-          repository: ClementTsang/bottom
-          latest: true
-          fileName: "*amd64.deb"
-          out-file-path: vyos-build/packages
-
-      - name: Download kopia deb
-        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
-        with:
-          repository: kopia/kopia
-          latest: true
-          fileName: "*linux_amd64.deb"
-          out-file-path: vyos-build/packages
 
       - name: Download sops deb
         uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
@@ -79,10 +59,7 @@ jobs:
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
-              --custom-package "age" \
-              --custom-package "bat" \
               --custom-package "git" \
-              --custom-package "gron" \
               --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "moreutils" \
