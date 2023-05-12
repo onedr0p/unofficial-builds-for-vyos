@@ -61,6 +61,7 @@ jobs:
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
               --custom-package "git" \
+              --custom-package "iptables" \
               --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "moreutils" \
