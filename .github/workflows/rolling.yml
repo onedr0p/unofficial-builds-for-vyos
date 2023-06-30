@@ -65,6 +65,7 @@ jobs:
               --custom-package "jo" \
               --custom-package "jq" \
               --custom-package "moreutils" \
+              --custom-package "vim" \
               --custom-package "tree"
 
       - name: Create release with artifact
