@@ -8,7 +8,7 @@ on:
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
-  VYOS_BRANCH: current
+  VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
   VYOS_BUILD_BY: 98030736+rosey-bot[bot]@users.noreply.github.com
   VYOS_BUILD_TYPE: release
