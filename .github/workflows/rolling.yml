@@ -22,7 +22,7 @@ jobs:
       # https://github.com/ncipollo/release-action/issues/208.
       contents: write
     container:
-      image: vyos/vyos-build:current
+      image: vyos/vyos-build:sagitta
       options: --privileged
     steps:
       - name: Generate Token
