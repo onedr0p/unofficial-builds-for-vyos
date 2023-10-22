@@ -63,7 +63,6 @@ jobs:
               --custom-package "git" \
               --custom-package "iptables" \
               --custom-package "jo" \
-              --custom-package "jq" \
               --custom-package "moreutils" \
               --custom-package "python3-venv" \
               --custom-package "tree"
