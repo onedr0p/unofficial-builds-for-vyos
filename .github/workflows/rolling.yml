@@ -43,7 +43,7 @@ jobs:
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
       - name: Download sops deb
-        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
+        uses: robinraju/release-downloader@efa4cd07bd0195e6cc65e9e30c251b49ce4d3e51 # v1.8
         with:
           repository: mozilla/sops
           latest: true
@@ -68,7 +68,7 @@ jobs:
               --custom-package "tree"
 
       - name: Create release with artifact
-        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1
+        uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5 # v1.13.0
         with:
           token: "${{ steps.generate-token.outputs.token }}"
           tag: "v${{ steps.vars.outputs.tag-name }}"
@@ -78,8 +78,17 @@ jobs:
             Official VyOS Changelog:
             https://docs.vyos.io/en/latest/changelog/1.4.html
 
-      - name: Remove old releases
-        uses: dev-drprasad/delete-older-releases@v0.2.1
+      - name: Delete orphaned release
+        if: failure()
+        uses: dev-drprasad/delete-tag-and-release@5eafd8668311bf3e4d6c1e9898f32a317103de68 # v0.2.1
+        with:
+          github_token: "${{ steps.generate-token.outputs.token }}"
+          tag_name: "v${{ steps.vars.outputs.tag-name }}"
+          delete_release: true
+
+      - name: Prune old releases
+        if: always()
+        uses: dev-drprasad/delete-older-releases@5494cd8b61c31b3c7a15f6267901195ec7df64e8 # v0.3.2
         with:
           keep_latest: 120
           delete_tags: true
