@@ -17,7 +17,6 @@
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "suppressNotifications": ["prIgnoreNotification"],
   "rebaseWhen": "conflicted",
-  "commitBodyTable": true,
   "packageRules": [
     {
       "description": "Auto merge GitHub Actions",
