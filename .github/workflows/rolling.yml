@@ -82,9 +82,10 @@ jobs:
         if: failure()
         uses: dev-drprasad/delete-tag-and-release@5eafd8668311bf3e4d6c1e9898f32a317103de68 # v0.2.1
         with:
-          github_token: "${{ steps.generate-token.outputs.token }}"
           tag_name: "v${{ steps.vars.outputs.tag-name }}"
           delete_release: true
+        env:
+          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
 
       - name: Prune old releases
         if: always()
