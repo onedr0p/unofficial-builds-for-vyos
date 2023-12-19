@@ -45,7 +45,7 @@ jobs:
       - name: Download sops deb
         uses: robinraju/release-downloader@efa4cd07bd0195e6cc65e9e30c251b49ce4d3e51 # v1.8
         with:
-          repository: mozilla/sops
+          repository: getsops/sops
           latest: true
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
