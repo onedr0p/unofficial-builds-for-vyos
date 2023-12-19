@@ -64,8 +64,8 @@ jobs:
               --custom-package "iptables" \
               --custom-package "jo" \
               --custom-package "moreutils" \
-              --custom-package "python3-venv" \
-              --custom-package "tree"
+              --custom-package "tree" \
+              --custom-package "vim"
 
       - name: Create release with artifact
         uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5 # v1.13.0
