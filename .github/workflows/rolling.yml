@@ -1,5 +1,6 @@
 ---
-name: VyOS Rolling
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "VyOS Rolling"
 
 on:
   workflow_dispatch:
@@ -10,7 +11,7 @@ env:
   VYOS_URL: https://github.com/vyos/vyos-build
   VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
-  VYOS_BUILD_BY: 98030736+rosey-bot[bot]@users.noreply.github.com
+  VYOS_BUILD_BY: "${{ secrets.BOT_USER_ID }}+${{ secrets.BOT_USERNAME }}[bot]@users.noreply.github.com"
   VYOS_BUILD_TYPE: release
   VYOS_VERSION: 1.4-rolling
 
@@ -18,32 +19,32 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      # Need permission to write to the Releases tab now.
-      # https://github.com/ncipollo/release-action/issues/208.
       contents: write
     container:
       image: vyos/vyos-build:sagitta
       options: --privileged
     steps:
       - name: Generate Token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
-        id: generate-token
+        uses: actions/create-github-app-token@v1
+        id: app-token
         with:
-          app_id: "${{ secrets.BOT_APP_ID }}"
-          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Setup variables
         id: vars
+        shell: bash
         run: |
           build_date=$(date +%Y%m%d%H%M)
           echo "tag-name=${{ env.VYOS_VERSION }}-${build_date}" >> "$GITHUB_OUTPUT"
           echo "iso-name=${{ env.VYOS_VERSION }}-${build_date}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
+        shell: bash
         run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
 
       - name: Download sops deb
-        uses: robinraju/release-downloader@efa4cd07bd0195e6cc65e9e30c251b49ce4d3e51 # v1.8
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: getsops/sops
           latest: true
@@ -51,6 +52,7 @@ jobs:
           out-file-path: vyos-build/packages
 
       - name: Configure
+        shell: bash
         working-directory: vyos-build
         run: |
           sudo make clean
@@ -67,9 +69,9 @@ jobs:
               --custom-package "vim"
 
       - name: Create release with artifact
-        uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5 # v1.13.0
+        uses: ncipollo/release-action@v1
         with:
-          token: "${{ steps.generate-token.outputs.token }}"
+          token: "${{ steps.app-token.outputs.token }}"
           tag: "v${{ steps.vars.outputs.tag-name }}"
           artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
           artifactErrorsFailBuild: true
@@ -78,19 +80,19 @@ jobs:
             https://docs.vyos.io/en/latest/changelog/1.4.html
 
       - name: Delete orphaned release
-        if: failure()
-        uses: dev-drprasad/delete-tag-and-release@5eafd8668311bf3e4d6c1e9898f32a317103de68 # v0.2.1
+        if: "${{ failure() }}"
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
           tag_name: "v${{ steps.vars.outputs.tag-name }}"
           delete_release: true
-        env:
-          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
 
       - name: Prune old releases
-        if: always()
-        uses: dev-drprasad/delete-older-releases@5494cd8b61c31b3c7a15f6267901195ec7df64e8 # v0.3.2
+        if: "${{ always() }}"
+        uses: dev-drprasad/delete-older-releases@v0.3.2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
           keep_latest: 120
           delete_tags: true
-        env:
-          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
