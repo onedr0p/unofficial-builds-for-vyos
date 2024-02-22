@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "VyOS Rolling"
+name: "VyOS Rolling 1.5.x"
 
 on:
   workflow_dispatch:
@@ -9,11 +9,10 @@ on:
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
-  VYOS_BRANCH: sagitta
+  VYOS_BRANCH: circinus
   VYOS_ARCH: amd64
-  VYOS_BUILD_BY: "${{ secrets.BOT_USER_ID }}+${{ secrets.BOT_USERNAME }}[bot]@users.noreply.github.com"
   VYOS_BUILD_TYPE: release
-  VYOS_VERSION: 1.4-rolling
+  VYOS_VERSION: 1.5-rolling
 
 jobs:
   release:
@@ -21,7 +20,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: vyos/vyos-build:sagitta
+      image: vyos/vyos-build:circinus
       options: --privileged
     steps:
       - name: Generate Token
@@ -51,6 +50,14 @@ jobs:
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
+      - name: Download vyaml deb
+        uses: robinraju/release-downloader@v1.9
+        with:
+          repository: p3lim/vyaml
+          latest: true
+          fileName: "*amd64.deb"
+          out-file-path: vyos-build/packages
+
       - name: Configure
         shell: bash
         working-directory: vyos-build
@@ -58,7 +65,7 @@ jobs:
           sudo make clean
           sudo ./build-vyos-image iso \
               --architecture ${{ env.VYOS_ARCH }} \
-              --build-by ${{ env.VYOS_BUILD_BY }} \
+              --build-by ${{ github.repository }} \
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
@@ -75,9 +82,10 @@ jobs:
           tag: "v${{ steps.vars.outputs.tag-name }}"
           artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
           artifactErrorsFailBuild: true
+          prerelease: true
           body: |
             Official VyOS Changelog:
-            https://docs.vyos.io/en/latest/changelog/1.4.html
+            https://docs.vyos.io/en/latest/changelog/1.5.html
 
       - name: Delete orphaned release
         if: "${{ failure() }}"
@@ -94,5 +102,6 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          keep_latest: 120
+          keep_latest: 90
           delete_tags: true
+          delete_tag_pattern: rolling
