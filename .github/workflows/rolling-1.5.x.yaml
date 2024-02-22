@@ -9,7 +9,7 @@ on:
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
-  VYOS_BRANCH: circinus
+  VYOS_BRANCH: current
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
   VYOS_VERSION: 1.5-rolling
