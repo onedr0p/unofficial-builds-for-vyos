@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: vyos/vyos-build:circinus
+      image: vyos/vyos-build:current
       options: --privileged
     steps:
       - name: Generate Token
