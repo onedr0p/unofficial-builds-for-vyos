@@ -30,13 +30,19 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Increment build number
+        uses: action-pack/increment@v2
+        with:
+          name: "VYOS_1_4_LTS_BUILD"
+          token: ${{ steps.app-token.outputs.token }}
+
       - name: Setup variables
         id: vars
         shell: bash
         run: |
           build_date=$(date +%Y%m%d%H%M)
-          echo "tag-name=${{ env.VYOS_VERSION }}-${build_date}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${{ env.VYOS_VERSION }}-${build_date}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "tag-name=${{ env.VYOS_VERSION }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${{ env.VYOS_VERSION }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
         shell: bash
