@@ -33,21 +33,35 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup variables
-        id: vars
+      - name: Format version
+        id: version
         shell: bash
         run: |
           VYOS_TAG=${{ env.VYOS_TAG }}
           VYOS_VERSION=${VYOS_TAG%-*}
-          echo "tag-name=${VYOS_VERSION}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${VYOS_VERSION}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
+          echo "vyos-version=${VYOS_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
 
       - name: Generate build number
         id: buildnumber
-        uses: onyxmueller/build-tag-number@v1
+        # TODO: Update if/when PR is merged into upstream
+        uses: bjw-s/increment-repo-variable@build
         with:
+          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
           token: ${{ steps.app-token.outputs.token }}
-          prefix: ${{ steps.vars.outputs.tag-name }}
+
+      - name: Setup variables
+        id: vars
+        shell: bash
+        run: |
+          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${{ steps.version.outputs.vyos-version }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
+
+      - name: Debug
+        shell: bash
+        run: |
+          echo "Tag: ${{ steps.vars.outputs.tag-name }}"
+          exit 1
 
       - name: Clone vyos-build
         shell: bash
