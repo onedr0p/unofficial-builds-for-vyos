@@ -47,7 +47,7 @@ jobs:
           echo "vyos-version=${VYOS_VERSION}" >> "$GITHUB_OUTPUT"
           echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
 
-      - name: Generate build number
+      - name: Increment build number
         id: buildnumber
         # TODO: Update if/when PR is merged into upstream
         uses: bjw-s/increment-repo-variable@build
@@ -125,3 +125,12 @@ jobs:
         with:
           tag_name: "v${{ steps.vars.outputs.tag-name }}"
           delete_release: true
+
+      - name: Decrement build number
+        if: "${{ failure() }}"
+        # TODO: Update if/when PR is merged into upstream
+        uses: bjw-s/increment-repo-variable@build
+        with:
+          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
+          token: ${{ steps.app-token.outputs.token }}
+          amount: -1
