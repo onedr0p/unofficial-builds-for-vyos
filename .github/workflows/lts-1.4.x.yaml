@@ -57,12 +57,6 @@ jobs:
           echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
           echo "iso-name=${{ steps.version.outputs.vyos-version }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
 
-      - name: Debug
-        shell: bash
-        run: |
-          echo "Tag: ${{ steps.vars.outputs.tag-name }}"
-          exit 1
-
       - name: Clone vyos-build
         shell: bash
         run: git clone -b ${{ env.VYOS_TAG }} --depth 1 ${{ env.VYOS_URL }}
@@ -95,7 +89,7 @@ jobs:
               --build-by ${{ github.repository }} \
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
-              --version ${{ steps.buildnumber.outputs.build_number }} \
+              --version ${{ steps.vars.outputs.tag-name }} \
               --custom-package "iptables" \
               --custom-package "jo" \
               --custom-package "moreutils" \
@@ -110,7 +104,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          tag: "v${{ steps.buildnumber.outputs.build_number }}"
+          tag: "v${{ steps.vars.outputs.tag-name }}"
           artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
           artifactErrorsFailBuild: true
           prerelease: false
@@ -118,21 +112,11 @@ jobs:
             Official VyOS Changelog:
             https://docs.vyos.io/en/latest/changelog/1.4.html
 
-      # - name: Delete orphaned release
-      #   if: "${{ failure() }}"
-      #   uses: dev-drprasad/delete-tag-and-release@v0.2.1
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     tag_name: "v${{ steps.vars.outputs.tag-name }}"
-      #     delete_release: true
-
-      # - name: Prune old releases
-      #   if: "${{ always() }}"
-      #   uses: dev-drprasad/delete-older-releases@v0.3.2
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     keep_latest: 90
-      #     delete_tags: true
-      #     delete_tag_pattern: rolling
+      - name: Delete orphaned release
+        if: "${{ failure() }}"
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        with:
+          tag_name: "v${{ steps.vars.outputs.tag-name }}"
+          delete_release: true
