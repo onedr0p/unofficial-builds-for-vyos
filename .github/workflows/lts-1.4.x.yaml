@@ -5,8 +5,6 @@ name: "VyOS LTS 1.4.x"
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
     paths:
       - .github/workflows/lts-1.4.x.yaml
 
