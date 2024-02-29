@@ -1,7 +1,3 @@
 # vyos
 
-VyOS **1.4-rolling** with additional packages.
-
-## Packages
-
-View the [Github workflow](.github/workflows/rolling.yml) to see what packages are added.
+Vyos **1.4 LTS** and **1.5-rolling** release builds for AMD64 with additional packages.
