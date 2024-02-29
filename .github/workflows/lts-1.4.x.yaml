@@ -7,10 +7,15 @@ on:
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
-  VYOS_BRANCH: current
+  VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
-  VYOS_VERSION: 1.5-rolling
+  # TODO: Add renovate snippet
+  VYOS_TAG: 1.4.0-epa1
+  # TODO: Add renovate snippet
+  SOPS_VERSION: v3.8.1
+  # TODO: Add renovate snippet
+  VYAML_VERSION: 0.2.5
 
 jobs:
   release:
@@ -38,9 +43,10 @@ jobs:
         id: vars
         shell: bash
         run: |
-          build_date=$(date +%Y%m%d%H%M)
-          echo "tag-name=${{ env.VYOS_VERSION }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${{ env.VYOS_VERSION }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
+          VYOS_TAG=${{ env.VYOS_TAG }}
+          VYOS_VERSION=${VYOS_TAG%-*}
+          echo "tag-name=${VYOS_VERSION}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${VYOS_VERSION}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
         shell: bash
@@ -50,7 +56,8 @@ jobs:
         uses: robinraju/release-downloader@v1.9
         with:
           repository: getsops/sops
-          latest: true
+          latest: false
+          tag: ${{ env.SOPS_VERSION }}
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
@@ -58,7 +65,8 @@ jobs:
         uses: robinraju/release-downloader@v1.9
         with:
           repository: p3lim/vyaml
-          latest: true
+          latest: false
+          tag: ${{ env.VYAML_VERSION }}
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
