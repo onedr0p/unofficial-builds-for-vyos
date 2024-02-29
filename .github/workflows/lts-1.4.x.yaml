@@ -4,8 +4,6 @@ name: "VyOS LTS 1.4.x"
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 3 * * *
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
