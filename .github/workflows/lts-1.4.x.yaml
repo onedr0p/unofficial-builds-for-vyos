@@ -4,13 +4,23 @@ name: "VyOS LTS 1.4.x"
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/lts-1.4.x.yaml
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
-  VYOS_BRANCH: current
+  VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
-  VYOS_VERSION: 1.5-rolling
+  # TODO: Add renovate snippet
+  VYOS_TAG: 1.4.0-epa1
+  # TODO: Add renovate snippet
+  SOPS_VERSION: v3.8.1
+  # TODO: Add renovate snippet
+  VYAML_VERSION: 0.2.5
 
 jobs:
   release:
@@ -18,7 +28,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: vyos/vyos-build:current
+      image: vyos/vyos-build:sagitta
       options: --privileged
     steps:
       - name: Generate Token
@@ -28,29 +38,41 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Format version
+        id: version
+        shell: bash
+        run: |
+          VYOS_TAG=${{ env.VYOS_TAG }}
+          VYOS_VERSION=${VYOS_TAG%-*}
+          echo "vyos-version=${VYOS_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
+
       - name: Increment build number
-        uses: action-pack/increment@v2
+        id: buildnumber
+        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
+        uses: bjw-s/increment-repo-variable@build
         with:
-          name: "VYOS_1_4_LTS_BUILD"
+          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup variables
         id: vars
         shell: bash
         run: |
-          build_date=$(date +%Y%m%d%H%M)
-          echo "tag-name=${{ env.VYOS_VERSION }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${{ env.VYOS_VERSION }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
+          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
+          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ env.VYOS_ARCH }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
         shell: bash
-        run: git clone -b ${{ env.VYOS_BRANCH }} --single-branch ${{ env.VYOS_URL }}
+        run: git clone -b ${{ env.VYOS_TAG }} --depth 1 ${{ env.VYOS_URL }}
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
         with:
           repository: getsops/sops
-          latest: true
+          latest: false
+          tag: ${{ env.SOPS_VERSION }}
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
@@ -58,7 +80,8 @@ jobs:
         uses: robinraju/release-downloader@v1.9
         with:
           repository: p3lim/vyaml
-          latest: true
+          latest: false
+          tag: ${{ env.VYAML_VERSION }}
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
@@ -79,33 +102,36 @@ jobs:
               --custom-package "tree" \
               --custom-package "vim"
 
-      # - name: Create release with artifact
-      #   uses: ncipollo/release-action@v1
-      #   with:
-      #     token: "${{ steps.app-token.outputs.token }}"
-      #     tag: "v${{ steps.vars.outputs.tag-name }}"
-      #     artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
-      #     artifactErrorsFailBuild: true
-      #     prerelease: false
-      #     body: |
-      #       Official VyOS Changelog:
-      #       https://docs.vyos.io/en/latest/changelog/1.4.html
+      - name: Rename ISO file
+        shell: bash
+        run: mv "./vyos-build/build/${{ steps.vars.outputs.generated-iso-name }}.iso" "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
 
-      # - name: Delete orphaned release
-      #   if: "${{ failure() }}"
-      #   uses: dev-drprasad/delete-tag-and-release@v0.2.1
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     tag_name: "v${{ steps.vars.outputs.tag-name }}"
-      #     delete_release: true
+      - name: Create release with artifact
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          tag: "v${{ steps.vars.outputs.tag-name }}"
+          artifacts: "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
+          artifactErrorsFailBuild: true
+          prerelease: false
+          body: |
+            Official VyOS Changelog:
+            https://docs.vyos.io/en/latest/changelog/1.4.html
 
-      # - name: Prune old releases
-      #   if: "${{ always() }}"
-      #   uses: dev-drprasad/delete-older-releases@v0.3.2
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     keep_latest: 90
-      #     delete_tags: true
-      #     delete_tag_pattern: rolling
+      - name: Delete orphaned release
+        if: "${{ failure() }}"
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        with:
+          tag_name: "v${{ steps.vars.outputs.tag-name }}"
+          delete_release: true
+
+      - name: Decrement build number
+        if: "${{ failure() }}"
+        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
+        uses: bjw-s/increment-repo-variable@build
+        with:
+          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
+          token: ${{ steps.app-token.outputs.token }}
+          amount: -1
