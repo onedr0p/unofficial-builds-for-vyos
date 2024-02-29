@@ -14,7 +14,7 @@ env:
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
   # renovate: datasource=github-tags depName=vyos/vyos-build
-  VYOS_VERSION: 1.4.0-epa1
+  VYOS_TAG: 1.4.0-epa1
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
   # renovate: datasource=github-releases depName=p3lim/vyaml
@@ -40,10 +40,10 @@ jobs:
         id: version
         shell: bash
         run: |
-          VYOS_VERSION=${{ env.VYOS_VERSION }}
-          VYOS_VERSION_TAG=${VYOS_VERSION%-*}
-          echo "vyos-version=${VYOS_VERSION_TAG}" >> "$GITHUB_OUTPUT"
-          echo "vyos-version-sanitized=${VYOS_VERSION_TAG//./_}" >> "$GITHUB_OUTPUT"
+          VYOS_TAG=${{ env.VYOS_TAG }}
+          VYOS_VERSION=${VYOS_TAG%-*}
+          echo "vyos-version=${VYOS_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
 
       - name: Increment build number
         id: buildnumber
@@ -62,7 +62,7 @@ jobs:
 
       - name: Clone vyos-build
         shell: bash
-        run: git clone -b ${{ env.VYOS_VERSION }} --depth 1 ${{ env.VYOS_URL }}
+        run: git clone -b ${{ env.VYOS_TAG }} --depth 1 ${{ env.VYOS_URL }}
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
