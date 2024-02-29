@@ -49,7 +49,7 @@ jobs:
 
       - name: Increment build number
         id: buildnumber
-        # TODO: Update if/when PR is merged into upstream
+        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
         uses: bjw-s/increment-repo-variable@build
         with:
           name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
@@ -60,7 +60,8 @@ jobs:
         shell: bash
         run: |
           echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${{ steps.version.outputs.vyos-version }}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
+          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ env.VYOS_ARCH }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
         shell: bash
@@ -101,16 +102,16 @@ jobs:
               --custom-package "tree" \
               --custom-package "vim"
 
-      - name: Show folder contents
+      - name: Rename ISO file
         shell: bash
-        run: ls -al ./vyos-build/build/
+        run: mv "./vyos-build/build/${{ steps.vars.outputs.generated-iso-name }}.iso" "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
 
       - name: Create release with artifact
         uses: ncipollo/release-action@v1
         with:
           token: "${{ steps.app-token.outputs.token }}"
           tag: "v${{ steps.vars.outputs.tag-name }}"
-          artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
+          artifacts: "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
           artifactErrorsFailBuild: true
           prerelease: false
           body: |
@@ -128,7 +129,7 @@ jobs:
 
       - name: Decrement build number
         if: "${{ failure() }}"
-        # TODO: Update if/when PR is merged into upstream
+        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
         uses: bjw-s/increment-repo-variable@build
         with:
           name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
