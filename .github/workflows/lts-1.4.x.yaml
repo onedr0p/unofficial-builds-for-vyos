@@ -49,8 +49,7 @@ jobs:
 
       - name: Increment build number
         id: buildnumber
-        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
-        uses: bjw-s/increment-repo-variable@build
+        uses: action-pack/increment@v2
         with:
           name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
           token: ${{ steps.app-token.outputs.token }}
@@ -129,8 +128,7 @@ jobs:
 
       - name: Decrement build number
         if: "${{ failure() }}"
-        # TODO: Update if/when PR https://github.com/action-pack/increment/pull/60 is merged into upstream
-        uses: bjw-s/increment-repo-variable@build
+        uses: action-pack/increment@v2
         with:
           name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
           token: ${{ steps.app-token.outputs.token }}
