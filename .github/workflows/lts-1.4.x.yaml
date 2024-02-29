@@ -5,8 +5,6 @@ name: "VyOS LTS 1.4.x"
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
     paths:
       - .github/workflows/lts-1.4.x.yaml
 
@@ -15,11 +13,11 @@ env:
   VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
-  # TODO: Add renovate snippet
+  # renovate: datasource=github-tags depName=vyos/vyos-build
   VYOS_TAG: 1.4.0-epa1
-  # TODO: Add renovate snippet
+  # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
-  # TODO: Add renovate snippet
+  # renovate: datasource=github-releases depName=p3lim/vyaml
   VYAML_VERSION: 0.2.5
 
 jobs:
