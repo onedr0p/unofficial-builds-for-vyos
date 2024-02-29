@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: vyos/vyos-build:current
+      image: vyos/vyos-build:sagitta
       options: --privileged
     steps:
       - name: Generate Token
