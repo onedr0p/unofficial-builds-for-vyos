@@ -5,8 +5,14 @@ name: "VyOS LTS 1.4.x"
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - .github/workflows/lts-1.4.x.yaml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   VYOS_URL: https://github.com/vyos/vyos-build
