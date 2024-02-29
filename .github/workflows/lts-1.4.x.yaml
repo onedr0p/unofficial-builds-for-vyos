@@ -88,6 +88,10 @@ jobs:
               --custom-package "tree" \
               --custom-package "vim"
 
+      - name: Show folder contents
+        shell: bash
+        run: ls -al ./vyos-build/build/
+
       - name: Create release with artifact
         uses: ncipollo/release-action@v1
         with:
