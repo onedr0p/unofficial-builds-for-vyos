@@ -33,12 +33,6 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Increment build number
-        uses: action-pack/increment@v2
-        with:
-          name: "VYOS_1_4_LTS_BUILD"
-          token: ${{ steps.app-token.outputs.token }}
-
       - name: Setup variables
         id: vars
         shell: bash
@@ -46,7 +40,14 @@ jobs:
           VYOS_TAG=${{ env.VYOS_TAG }}
           VYOS_VERSION=${VYOS_TAG%-*}
           echo "tag-name=${VYOS_VERSION}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${VYOS_VERSION}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}.${{ vars.VYOS_1_4_LTS_BUILD }}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${VYOS_VERSION}-${{ env.VYOS_ARCH }}+${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate build number
+        id: buildnumber
+        uses: onyxmueller/build-tag-number@v1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          prefix: ${{ steps.vars.outputs.tag-name }}
 
       - name: Clone vyos-build
         shell: bash
@@ -80,24 +81,24 @@ jobs:
               --build-by ${{ github.repository }} \
               --build-type ${{ env.VYOS_BUILD_TYPE }} \
               --build-comment "VyOS with additional packages" \
-              --version ${{ steps.vars.outputs.tag-name }} \
+              --version ${{ steps.buildnumber.outputs.build_number }} \
               --custom-package "iptables" \
               --custom-package "jo" \
               --custom-package "moreutils" \
               --custom-package "tree" \
               --custom-package "vim"
 
-      # - name: Create release with artifact
-      #   uses: ncipollo/release-action@v1
-      #   with:
-      #     token: "${{ steps.app-token.outputs.token }}"
-      #     tag: "v${{ steps.vars.outputs.tag-name }}"
-      #     artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
-      #     artifactErrorsFailBuild: true
-      #     prerelease: false
-      #     body: |
-      #       Official VyOS Changelog:
-      #       https://docs.vyos.io/en/latest/changelog/1.4.html
+      - name: Create release with artifact
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          tag: "v${{ steps.buildnumber.outputs.build_number }}"
+          artifacts: "./vyos-build/build/vyos-${{ steps.vars.outputs.iso-name }}.iso"
+          artifactErrorsFailBuild: true
+          prerelease: false
+          body: |
+            Official VyOS Changelog:
+            https://docs.vyos.io/en/latest/changelog/1.4.html
 
       # - name: Delete orphaned release
       #   if: "${{ failure() }}"
