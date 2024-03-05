@@ -68,7 +68,9 @@ jobs:
 
       - name: Clone vyos-build
         shell: bash
-        run: git clone -b ${{ env.VYOS_TAG }} --depth 1 ${{ env.VYOS_URL }}
+        run: |
+          git clone ${{ env.VYOS_URL }}
+          git switch ${{ env.VYOS_TAG }}
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
