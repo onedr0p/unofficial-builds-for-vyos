@@ -52,7 +52,7 @@ jobs:
           echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
 
       - name: Increment build number
-        id: buildnumber
+        id: build-number
         uses: action-pack/increment@v2
         with:
           name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
@@ -62,15 +62,13 @@ jobs:
         id: vars
         shell: bash
         run: |
-          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}" >> "$GITHUB_OUTPUT"
-          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
-          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.buildnumber.outputs.value }}.${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}" >> "$GITHUB_OUTPUT"
+          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
 
       - name: Clone vyos-build
         shell: bash
-        run: |
-          git clone ${{ env.VYOS_URL }}
-          git switch ${{ env.VYOS_TAG }}
+        run: git clone -b ${{ env.VYOS_TAG }} ${{ env.VYOS_URL }}
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
