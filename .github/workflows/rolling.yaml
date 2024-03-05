@@ -42,6 +42,7 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           repository: vyos/vyos-build
           ref: ${{ matrix.branch }}
+          fetch-depth: 0
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
