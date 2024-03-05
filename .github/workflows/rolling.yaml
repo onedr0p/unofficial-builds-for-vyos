@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: 0 3 * * *
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     runs-on: ubuntu-latest
