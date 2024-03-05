@@ -1,23 +1,22 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "VyOS Rolling 1.5.x"
+name: "VyOS Rolling"
 
 on:
   workflow_dispatch:
   schedule:
     - cron: 0 3 * * *
 
-env:
-  VYOS_BRANCH: current
-  VYOS_TAG: 1.5-rolling
-
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    strategy:
+      matrix:
+        branch: ["current", "sagitta"]
     container:
-      image: vyos/vyos-build:current
+      image: vyos/vyos-build:${{ matrix.branch }}
       options: --privileged
     steps:
       - name: Generate Token
@@ -32,16 +31,17 @@ jobs:
         shell: bash
         run: |
           build_date=$(date +%Y%m%d%H%M)
-          echo "tag-name=${{ env.VYOS_TAG }}-${build_date}" >> "$GITHUB_OUTPUT"
-          echo "iso-name=${{ env.VYOS_TAG }}-${build_date}-amd64" >> "$GITHUB_OUTPUT"
+          [[ "${{ matrix.branch }}" == "sagitta" ]] && vyos_version="1.4" || vyos_version="1.5"
+          echo "vyos-version=${vyos_version}" >> "$GITHUB_OUTPUT"
+          echo "tag-name=${vyos_version}-rolling-${build_date}" >> "$GITHUB_OUTPUT"
+          echo "iso-name=${vyos_version}-rolling-${build_date}-amd64" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           repository: vyos/vyos-build
-          ref: ${{ env.VYOS_BRANCH }}
-          fetch-depth: 0
+          ref: ${{ matrix.branch }}
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
@@ -86,7 +86,7 @@ jobs:
           prerelease: true
           body: |
             Official VyOS Changelog:
-            https://docs.vyos.io/en/latest/changelog/1.5.html
+            https://docs.vyos.io/en/latest/changelog/${{ steps.vars.outputs.vyos-version }}.html
 
       - name: Delete orphaned release
         if: "${{ failure() }}"
@@ -103,6 +103,6 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          keep_latest: 90
+          keep_latest: 180
           delete_tags: true
           delete_tag_pattern: rolling
