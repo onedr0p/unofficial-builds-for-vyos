@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VYOS_URL: https://github.com/vyos/vyos-build
   VYOS_BRANCH: sagitta
   VYOS_ARCH: amd64
   VYOS_BUILD_TYPE: release
@@ -66,9 +65,13 @@ jobs:
           echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
           echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
 
-      - name: Clone vyos-build
-        shell: bash
-        run: git clone -b ${{ env.VYOS_TAG }} ${{ env.VYOS_URL }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          repository: vyos/vyos-build
+          ref: ${{ env.VYOS_TAG }}
+          fetch-depth: 0
 
       - name: Download sops deb
         uses: robinraju/release-downloader@v1.9
