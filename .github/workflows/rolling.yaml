@@ -5,7 +5,7 @@ name: "VyOS Rolling"
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 3 * * *
+    - cron: "0 3 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -97,13 +97,3 @@ jobs:
         with:
           tag_name: "v${{ steps.vars.outputs.tag-name }}"
           delete_release: true
-
-      - name: Prune old releases
-        if: "${{ always() }}"
-        uses: dev-drprasad/delete-older-releases@v0.3.2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          keep_latest: 180
-          delete_tags: true
-          delete_tag_pattern: rolling
