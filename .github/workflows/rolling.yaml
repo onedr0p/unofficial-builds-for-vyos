@@ -61,7 +61,6 @@ jobs:
 
       - name: Configure
         shell: bash
-        working-directory: vyos-build
         run: |
           sudo make clean
           sudo ./build-vyos-image iso \
