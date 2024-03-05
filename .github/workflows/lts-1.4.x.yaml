@@ -16,8 +16,6 @@ concurrency:
 
 env:
   VYOS_BRANCH: sagitta
-  VYOS_ARCH: amd64
-  VYOS_BUILD_TYPE: release
   # renovate: datasource=github-tags depName=vyos/vyos-build
   VYOS_TAG: 1.4.0-epa1
   # renovate: datasource=github-releases depName=getsops/sops
@@ -31,7 +29,8 @@ jobs:
     permissions:
       contents: write
     container:
-      image: vyos/vyos-build:sagitta
+      # https://github.com/onedr0p/vyos-build/issues/123
+      image: vyos/vyos-build:sagitta@sha256:465bc74f918027f08dd3503356dc4118dee331422fb2eae1d3e50231492a8005
       options: --privileged
     steps:
       - name: Generate Token
@@ -62,8 +61,8 @@ jobs:
         shell: bash
         run: |
           echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}" >> "$GITHUB_OUTPUT"
-          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
-          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.${{ env.VYOS_ARCH }}" >> "$GITHUB_OUTPUT"
+          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-amd64" >> "$GITHUB_OUTPUT"
+          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.amd64" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,9 +95,9 @@ jobs:
         run: |
           sudo make clean
           sudo ./build-vyos-image iso \
-              --architecture ${{ env.VYOS_ARCH }} \
+              --architecture amd64 \
               --build-by ${{ github.repository }} \
-              --build-type ${{ env.VYOS_BUILD_TYPE }} \
+              --build-type release \
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
               --custom-package "iptables" \
