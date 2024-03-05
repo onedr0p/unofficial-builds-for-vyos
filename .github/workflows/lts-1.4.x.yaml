@@ -24,7 +24,7 @@ env:
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
   # renovate: datasource=github-releases depName=p3lim/vyaml
-  VYAML_VERSION: 0.2.5
+  VYAML_VERSION: 0.2.6
 
 jobs:
   release:
