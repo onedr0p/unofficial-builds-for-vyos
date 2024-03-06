@@ -75,7 +75,7 @@ jobs:
           latest: false
           tag: ${{ env.SOPS_VERSION }}
           fileName: "*amd64.deb"
-          out-file-path: packages
+          out-file-path: vyos-build/packages
 
       - name: Download vyaml deb
         uses: robinraju/release-downloader@v1.9
@@ -84,10 +84,11 @@ jobs:
           latest: false
           tag: ${{ env.VYAML_VERSION }}
           fileName: "*amd64.deb"
-          out-file-path: packages
+          out-file-path: vyos-build/packages
 
       - name: Configure
         shell: bash
+        working-directory: vyos-build
         run: |
           sudo make clean
           sudo ./build-vyos-image iso \
@@ -104,14 +105,14 @@ jobs:
 
       - name: Rename ISO file
         shell: bash
-        run: mv "./build/${{ steps.vars.outputs.generated-iso-name }}.iso" "./build/${{ steps.vars.outputs.target-iso-name }}.iso"
+        run: mv "./vyos-build/build/${{ steps.vars.outputs.generated-iso-name }}.iso" "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
 
       - name: Create release with artifact
         uses: ncipollo/release-action@v1
         with:
           token: "${{ steps.app-token.outputs.token }}"
           tag: "v${{ steps.vars.outputs.tag-name }}"
-          artifacts: "./build/${{ steps.vars.outputs.target-iso-name }}.iso"
+          artifacts: "./vyos-build/build/${{ steps.vars.outputs.target-iso-name }}.iso"
           artifactErrorsFailBuild: true
           prerelease: false
           body: |
