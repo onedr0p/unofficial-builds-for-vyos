@@ -15,7 +15,7 @@
       "description": ["Process custom dependencies"],
       "fileMatch": ["(^|/).github/.+\\.ya?ml$"],
       "matchStrings": [
-        "(?m:# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+?: \"?(?<currentValue>\\S+?)\"?$)"
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+: (&\\S+\\s)?(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
     }
@@ -24,7 +24,7 @@
     {
       "description": ["Custom versioning for vyos"],
       "matchDatasources": ["github-tags"],
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)((?<compatibility>\\-epa)(?<build>\\d+))?$",
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)((?<compatibility>\\-epa)(?<build>\\d+))?$",
       "matchPackagePatterns": ["vyos"]
     }
   ]
