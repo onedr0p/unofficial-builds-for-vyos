@@ -17,7 +17,7 @@ concurrency:
 env:
   VYOS_BRANCH: sagitta
   # renovate: datasource=github-tags depName=vyos/vyos-build
-  VYOS_TAG: 1.4.0-epa1
+  VYOS_TAG: 1.4.0-epa2
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
   # renovate: datasource=github-releases depName=p3lim/vyaml
