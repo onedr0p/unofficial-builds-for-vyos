@@ -17,7 +17,7 @@ concurrency:
 env:
   VYOS_BRANCH: sagitta
   # renovate: datasource=github-tags depName=vyos/vyos-build
-  VYOS_TAG: 1.4.0-epa2
+  VYOS_VERSION: 1.4.0-epa2
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
   # renovate: datasource=github-releases depName=p3lim/vyaml
@@ -44,25 +44,25 @@ jobs:
         id: version
         shell: bash
         run: |
-          VYOS_TAG=${{ env.VYOS_TAG }}
-          VYOS_VERSION=${VYOS_TAG%-*}
-          echo "vyos-version=${VYOS_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "vyos-version-sanitized=${VYOS_VERSION//./_}" >> "$GITHUB_OUTPUT"
+          version=${{ env.VYOS_VERSION }}
+          echo "vyos-version=${version}" >> $GITHUB_OUTPUT
+          version_key=$(echo "${version//[^[:alnum:]]/_}")
+          echo "vyos-version-key=VYOS_${version_key}_BUILD" >> $GITHUB_OUTPUT
 
       - name: Increment build number
         id: build-number
         uses: action-pack/increment@v2
         with:
-          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
+          name: ${{ steps.version.outputs.vyos-version-key }}
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup variables
         id: vars
         shell: bash
         run: |
-          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}" >> "$GITHUB_OUTPUT"
-          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-amd64" >> "$GITHUB_OUTPUT"
-          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.amd64" >> "$GITHUB_OUTPUT"
+          echo "tag-name=${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}" >> $GITHUB_OUTPUT
+          echo "generated-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}-amd64" >> $GITHUB_OUTPUT
+          echo "target-iso-name=vyos-${{ steps.version.outputs.vyos-version }}+${{ github.repository_owner }}.${{ steps.build-number.outputs.value }}.amd64" >> $GITHUB_OUTPUT
 
       - name: Clone vyos-build
         shell: bash
@@ -137,6 +137,6 @@ jobs:
         if: "${{ failure() }}"
         uses: action-pack/increment@v2
         with:
-          name: VYOS_${{ steps.version.outputs.vyos-version-sanitized }}_BUILD
+          name: ${{ steps.version.outputs.vyos-version-key }}
           token: ${{ steps.app-token.outputs.token }}
           amount: -1
