@@ -71,6 +71,7 @@ jobs:
               --build-type release \
               --build-comment "VyOS with additional packages" \
               --version ${{ steps.vars.outputs.tag-name }} \
+              --custom-package "age" \
               --custom-package "iptables" \
               --custom-package "jo" \
               --custom-package "moreutils" \
