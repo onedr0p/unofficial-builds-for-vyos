@@ -45,7 +45,7 @@ jobs:
         run: git clone -b ${{ matrix.branch }} --single-branch https://github.com/vyos/vyos-build
 
       - name: Download sops deb
-        uses: robinraju/release-downloader@v1.9
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: getsops/sops
           latest: true
@@ -53,7 +53,7 @@ jobs:
           out-file-path: vyos-build/packages
 
       - name: Download vyaml deb
-        uses: robinraju/release-downloader@v1.9
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: p3lim/vyaml
           latest: true
