@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "VyOS LTS 1.4.x"
+name: "LTS 1.4.x"
 
 on:
   workflow_dispatch:
@@ -121,7 +121,10 @@ jobs:
           artifactErrorsFailBuild: true
           prerelease: false
           body: |
-            Official VyOS Changelog:
+            > [!WARNING]
+            > This is an unofficial build of VyOS™
+
+            Official VyOS™ Changelog:
             https://docs.vyos.io/en/latest/changelog/1.4.html
 
       - name: Delete orphaned release

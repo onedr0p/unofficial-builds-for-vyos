@@ -1,3 +1,3 @@
-# vyos
+# Unofficial builds for VyOS™
 
-Vyos **1.4 LTS** and **1.5-rolling** release builds for AMD64 with additional packages.
+This repo contains **unofficial** builds of [VyOS™](https://vyos.io/) for **1.4 LTS**, **1.4-rolling**, and **1.5-rolling**.

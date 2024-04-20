@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "VyOS Rolling"
+name: "Rolling"
 
 on:
   workflow_dispatch:
@@ -87,7 +87,10 @@ jobs:
           artifactErrorsFailBuild: true
           prerelease: true
           body: |
-            Official VyOS Changelog:
+            > [!WARNING]
+            > This is an unofficial build of VyOS™
+
+            Official VyOS™ Changelog:
             https://docs.vyos.io/en/latest/changelog/${{ steps.vars.outputs.vyos-version }}.html
 
       - name: Delete orphaned release
