@@ -52,14 +52,6 @@ jobs:
           fileName: "*amd64.deb"
           out-file-path: vyos-build/packages
 
-      - name: Download vyaml deb
-        uses: robinraju/release-downloader@v1.10
-        with:
-          repository: p3lim/vyaml
-          latest: true
-          fileName: "*amd64.deb"
-          out-file-path: vyos-build/packages
-
       - name: Configure
         shell: bash
         working-directory: vyos-build
